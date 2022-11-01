@@ -7,8 +7,9 @@ function App() {
   const [gridInfo, setGridInfo] = React.useState([])
   const [switchChoice, setSwitchChoice] = React.useState(true)
   const [takenSqaures, setTakenSqares] = React.useState([-1,-1,-1,-1])
+  const [chosePositionState, setChosePositionState] = React.useState(true)
 
-  React.useEffect(function(){ 
+React.useEffect(function(){ 
     const newGridInfo = []
     for(let i=0; i<10; i++){
       for(let j=0; j<10; j++){
@@ -23,9 +24,21 @@ function App() {
       setGridInfo(newGridInfo)
   }, [])
 
+const grid = gridInfo.map(position => 
+  <Pixel 
+    key={position.column+10*position.row}
+    column={position.column} 
+    row={position.row} 
+    state={position.state} 
+    info={changePixel}
+  />
+)
+
 function changePixel (column, row){
 
   const index = column+10*row
+
+  if(!chosePositionState){return}
 
   if(takenSqaures[0]===column && takenSqaures[1]===row){return}
   if(takenSqaures[2]===column && takenSqaures[3]===row){return}
@@ -77,31 +90,44 @@ function changePixel (column, row){
       }
       }
     }
+    console.log(newInfo)
     return newInfo
   })
   setSwitchChoice(prevState => !prevState)
 }
 
-const grid = gridInfo.map(position => 
-  <Pixel 
-    key={position.column+10*position.row}
-    column={position.column} 
-    row={position.row} 
-    state={position.state} 
-    info={changePixel}
-  />
-)
+function startGame(){
+  setChosePositionState(false)
+}
 
   return (
     <div className='grid'>
+
       {grid}
+
+      {chosePositionState === true ?
+
+      <>
+
       <p>now chosing:</p>
+
       <Pixel
       key={"special"}
       column={1000}
       row={1000}
       state={switchChoice ? 3 : 4}
       />
+
+      </>
+
+        :
+        
+        <>
+          <p>game started</p>
+        </>
+
+        }
+      <button onClick={startGame}>start</button>
     </div>
   )
 }
