@@ -6,7 +6,7 @@ import Pixel from './Components/Pixel'
 function App() {
   const [gridInfo, setGridInfo] = React.useState([])
   const [switchChoice, setSwitchChoice] = React.useState(true)
-
+  const [takenSqaures, setTakenSqares] = React.useState([-1,-1,-1,-1])
 
   React.useEffect(function(){ 
     const newGridInfo = []
@@ -24,31 +24,57 @@ function App() {
   }, [])
 
 function changePixel (column, row){
+
   const index = column+10*row
+
+  if(takenSqaures[0]===column && takenSqaures[1]===row){return}
+  if(takenSqaures[2]===column && takenSqaures[3]===row){return}
+
+  setTakenSqares(prevTable => {
+    const newtable=prevTable
+    if(switchChoice){
+      newtable[0]=column
+      newtable[1]=row
+    }else{
+      newtable[2]=column
+      newtable[3]=row
+    }
+    return newtable
+  })
   
   setGridInfo(prevInfo => {
+
     const newInfo = []
     let newstate = 0
+    let oldstate = 0
     if(switchChoice){
       newstate=3
+      oldstate=4
     }else{
       newstate=4
+      oldstate=3
     }
+
     for(let i = 0; i <prevInfo.length; i++){
       const currentInfo = prevInfo[i]
+      
       if(i === index){
         const updatedInfo = {
           ...currentInfo, state:newstate
         }
-        console.log(updatedInfo)
         newInfo.push(updatedInfo)
       } else{
-        
+        if(currentInfo.state!==oldstate){
         const updatedInfo = {
           ...currentInfo, state:0
         }
-        console.log(updatedInfo)
         newInfo.push(updatedInfo)
+      }else{
+        const updatedInfo = {
+          ...currentInfo, state:oldstate
+        }
+        newInfo.push(updatedInfo)
+      }
       }
     }
     return newInfo
