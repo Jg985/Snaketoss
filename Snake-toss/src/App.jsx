@@ -29,13 +29,10 @@ function changePixel (column, row){
   setGridInfo(prevInfo => {
     const newInfo = []
     let newstate = 0
-    let oldstate = 0
     if(switchChoice){
       newstate=3
-      oldstate = 4
     }else{
       newstate=4
-      oldstate = 3
     }
     for(let i = 0; i <prevInfo.length; i++){
       const currentInfo = prevInfo[i]
@@ -43,16 +40,15 @@ function changePixel (column, row){
         const updatedInfo = {
           ...currentInfo, state:newstate
         }
+        console.log(updatedInfo)
+        newInfo.push(updatedInfo)
       } else{
-          if(currentInfo.state !== oldstate){
-          const updatedInfo = {
-            ...currentInfo, state:0
-          }
-        }else{
-          const updatedInfo = {
-            ...currentInfo, state:oldstate
-          }
+        
+        const updatedInfo = {
+          ...currentInfo, state:0
         }
+        console.log(updatedInfo)
+        newInfo.push(updatedInfo)
       }
     }
     return newInfo
