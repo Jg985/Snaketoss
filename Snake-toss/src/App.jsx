@@ -182,7 +182,7 @@ function boundaryCheck(column, row, checkList){
 
 function surroundingCheck(column, row, checkList,emptyCheckList){
   const position=column+10*row
-  if(position-10>0){
+  if(position-10>-1){
     if(emptyCheckList[position-10]){
       checkList[0]=false
     }
@@ -192,7 +192,7 @@ function surroundingCheck(column, row, checkList,emptyCheckList){
       checkList[1]=false
     }
   }
-  if(position-1>0){
+  if(position-1>-1){
     if(emptyCheckList[position-1]){  
       checkList[2]=false
   }
@@ -216,7 +216,6 @@ function stopf(){
 }
 
 async function startGame(){
-  console.log(startGameCheck())
   if(!startGameCheck()){return}
 
   let notEmptySquares=[]
@@ -235,8 +234,6 @@ async function startGame(){
     boundaryCheck(orangeHead[0],orangeHead[1],orangeChecklist)
     surroundingCheck(blueHead[0],blueHead[1],blueChecklist,notEmptySquares)
     surroundingCheck(orangeHead[0],orangeHead[1],orangeChecklist,notEmptySquares)
-    console.log(blueChecklist)
-    //console.log(orangeChecklist)
     if(winningCondition(blueChecklist)){
       console.log("orange won")
       break
@@ -245,8 +242,6 @@ async function startGame(){
       console.log("blue won")
       break
     }
-    console.log(blueHead)
-    console.log(orangeHead)
     const randPlayer = Boolean(Math.round(Math.random()));
     let randMove = randomNumberInRange(0,3)
     if(randPlayer){
@@ -266,7 +261,7 @@ async function startGame(){
       if(randMove===3){
         blueHead = goRight(blueHead[0],blueHead[1],1,notEmptySquares)
       }
-    }else{
+      }else{
       while(true){
         randMove = randomNumberInRange(0,3)
         if(orangeChecklist[randMove]){break}
@@ -284,7 +279,7 @@ async function startGame(){
         orangeHead = goRight(orangeHead[0],orangeHead[1],2,notEmptySquares)
       }
     }
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise(r => setTimeout(r, 50));
   }
   
 }
