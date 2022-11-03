@@ -9,6 +9,11 @@ function App() {
   const [headSquares, setHeadSquares] = React.useState([-1,-1,-1,-1])
   const [chosePositionState, setChosePositionState] = React.useState(true)
   const [color, setColor] = React.useState(true)
+  const [stop,setStop] = React.useState(true)
+
+  function randomNumberInRange(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
 React.useEffect(function(){ 
     const newGridInfo = []
@@ -100,21 +105,25 @@ function startGameCheck(){
   for(let i=0; i<headSquares.length; i++){
     if(headSquares[i]===-1){
       setChosePositionState(true)
-      return
+      return false
     } 
   }
   setChosePositionState(false)
+  return true
 }
 
-function move(column,row,state,move){
+function move(column,row,state,move,list){
   setGridInfo(prevInfo => {
     const position=column+10*row
+    let newposition = position-move
+    list[position]=true
+    list[newposition]=true
     const head=state+2
     const info=[]
     for(let i = 0; i <prevInfo.length; i++){
       const currentInfo = prevInfo[i]
       
-      if(i === position-move){
+      if(i === newposition){
         const updatedInfo = {
           ...currentInfo, state:head
         }
@@ -132,44 +141,152 @@ function move(column,row,state,move){
         info.push(updatedInfo)  
       }
     }
-    console.log(info)
     return info
   })
 }
 
-function goUp(column, row, state, color){
-  move(column,row,state,10)
+function goUp(column, row, state,list){
+  move(column,row,state,10,list)
   return [column, row-1]
 }
 
-function goDown(column, row, state){
-  move(column,row,state,-10)
+function goDown(column, row, state,list){
+  move(column,row,state,-10,list)
   return [column,row+1]
 }
 
-function goLeft(column, row, state){
-  move(column,row,state,1)
+function goLeft(column, row, state,list){
+  move(column,row,state,1,list)
   return [column-1,row]
 }
 
-function goRight(column, row, state){
-  move(column,row,state,-1)
+function goRight(column, row, state,list){
+  move(column,row,state,-1,list)
   return [column+1,row]
 }
 
-function startGame(){
+function boundaryCheck(column, row, checkList){
+  if(row===0){
+    checkList[0]=false
+  }
+  if(row===9){
+    checkList[1]=false
+  }
+  if(column===0){
+    checkList[2]=false
+  }
+  if(column===9){
+    checkList[3]=false
+  }
+}
+
+function surroundingCheck(column, row, checkList,emptyCheckList){
+  const position=column+10*row
+  if(position-10>0){
+    if(emptyCheckList[position-10]){
+      checkList[0]=false
+    }
+  }
+  if(position+10<100){
+    if(emptyCheckList[position+10]){
+      checkList[1]=false
+    }
+  }
+  if(position-1>0){
+    if(emptyCheckList[position-1]){  
+      checkList[2]=false
+  }
+  }
+  if(position+1<100){
+    if(emptyCheckList[position+1]){
+      checkList[3]=false
+  }
+  }
+}
+
+function winningCondition(checkList){
+  for(let i = 0; i <checkList.length; i++){
+    if(checkList[i]===true){return false}
+  }
+  return true
+}
+
+function stopf(){
+  setStop(false)
+}
+
+async function startGame(){
+  console.log(startGameCheck())
+  if(!startGameCheck()){return}
+
+  let notEmptySquares=[]
+  for(let i=0; i<100; i++){
+    notEmptySquares[i]=false
+  }
   let blueHead=[headSquares[0],headSquares[1]]
   let orangeHead=[headSquares[2],headSquares[3]]
-  startGameCheck()
-  blueHead = goUp(blueHead[0],blueHead[1],1)
-  blueHead = goUp(blueHead[0],blueHead[1],1)
-  blueHead = goLeft(blueHead[0],blueHead[1],1)
-  blueHead = goLeft(blueHead[0],blueHead[1],1)
-  blueHead = goDown(blueHead[0],blueHead[1],1)
-  blueHead = goDown(blueHead[0],blueHead[1],1)
-  blueHead = goDown(blueHead[0],blueHead[1],1)
-  blueHead = goRight(blueHead[0],blueHead[1],1)
-  console.log(gridInfo)
+  notEmptySquares[headSquares[0]+10*headSquares[1]]=true
+  notEmptySquares[headSquares[2]+10*headSquares[3]]=true
+
+  while(true){
+    let blueChecklist = [true,true,true,true]
+    let orangeChecklist = [true,true,true,true]
+    boundaryCheck(blueHead[0],blueHead[1],blueChecklist)
+    boundaryCheck(orangeHead[0],orangeHead[1],orangeChecklist)
+    surroundingCheck(blueHead[0],blueHead[1],blueChecklist,notEmptySquares)
+    surroundingCheck(orangeHead[0],orangeHead[1],orangeChecklist,notEmptySquares)
+    console.log(blueChecklist)
+    //console.log(orangeChecklist)
+    if(winningCondition(blueChecklist)){
+      console.log("orange won")
+      break
+    }
+    if(winningCondition(orangeChecklist)){
+      console.log("blue won")
+      break
+    }
+    console.log(blueHead)
+    console.log(orangeHead)
+    const randPlayer = Boolean(Math.round(Math.random()));
+    let randMove = randomNumberInRange(0,3)
+    if(randPlayer){
+      while(true){
+        randMove = randomNumberInRange(0,3)
+        if(blueChecklist[randMove]){break}
+      }
+      if(randMove===0){
+        blueHead = goUp(blueHead[0],blueHead[1],1,notEmptySquares)
+      }
+      if(randMove===1){
+        blueHead = goDown(blueHead[0],blueHead[1],1,notEmptySquares)
+      }
+      if(randMove===2){
+        blueHead = goLeft(blueHead[0],blueHead[1],1,notEmptySquares)
+      }
+      if(randMove===3){
+        blueHead = goRight(blueHead[0],blueHead[1],1,notEmptySquares)
+      }
+    }else{
+      while(true){
+        randMove = randomNumberInRange(0,3)
+        if(orangeChecklist[randMove]){break}
+      }
+      if(randMove===0){
+        orangeHead = goUp(orangeHead[0],orangeHead[1],2,notEmptySquares)
+      }
+      if(randMove===1){
+        orangeHead = goDown(orangeHead[0],orangeHead[1],2,notEmptySquares)
+      }
+      if(randMove===2){
+        orangeHead = goLeft(orangeHead[0],orangeHead[1],2,notEmptySquares)
+      }
+      if(randMove===3){
+        orangeHead = goRight(orangeHead[0],orangeHead[1],2,notEmptySquares)
+      }
+    }
+    await new Promise(r => setTimeout(r, 500));
+  }
+  
 }
 
   return (
@@ -198,6 +315,7 @@ function startGame(){
 
         <>
           <p>game started</p>
+          <button onClick={stopf}>stop</button>
         </>
 
         }
