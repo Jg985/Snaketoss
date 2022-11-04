@@ -35,6 +35,7 @@ export default function Pixel(props) {
         <div className='pixel' 
             style={stateOfPixel}  
             onClick={sinfo}>
+            <p className='number'>{props.number}</p>
         </div>
     )
 }

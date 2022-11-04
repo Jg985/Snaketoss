@@ -4,12 +4,14 @@ import Pixel from './Components/Pixel'
 
 
 function App() {
+  let numb = 0
+  let numo = 0
   const [gridInfo, setGridInfo] = React.useState([])
   const [switchChoice, setSwitchChoice] = React.useState(true)
   const [headSquares, setHeadSquares] = React.useState([-1,-1,-1,-1])
   const [chosePositionState, setChosePositionState] = React.useState(true)
-  const [color, setColor] = React.useState(true)
-  const [stop,setStop] = React.useState(true)
+  const [gameOver, setGameOver] = React.useState(false)
+  const [winner, setWinner] = React.useState("")
 
   function randomNumberInRange(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -22,7 +24,8 @@ React.useEffect(function(){
           const newPixel = {
             state: 0,
             column: j,
-            row: i
+            row: i,
+            number: null
           } 
           newGridInfo.push(newPixel) 
         }   
@@ -37,6 +40,7 @@ const grid = gridInfo.map(position =>
     row={position.row} 
     state={position.state} 
     info={changePixel}
+    number={position.number}
   />
 )
 
@@ -112,7 +116,7 @@ function startGameCheck(){
   return true
 }
 
-function move(column,row,state,move,list){
+function move(column,row,state,move,list,numbe){
   setGridInfo(prevInfo => {
     const position=column+10*row
     let newposition = position-move
@@ -132,7 +136,7 @@ function move(column,row,state,move,list){
       else if(i === position){
         
         const updatedInfo = {
-          ...currentInfo, state:state
+          ...currentInfo, state:state, number:numbe
         }
         info.push(updatedInfo)
       } else{
@@ -145,23 +149,37 @@ function move(column,row,state,move,list){
   })
 }
 
+function iterate(state){
+  if (state===1){
+    numb=numb+1
+    return numb
+  }else{
+    numo=numo+1
+    return numo
+  }
+}
+
 function goUp(column, row, state,list){
-  move(column,row,state,10,list)
+  const n = iterate(state)
+  move(column,row,state,10,list,n)
   return [column, row-1]
 }
 
 function goDown(column, row, state,list){
-  move(column,row,state,-10,list)
+  const n = iterate(state)
+  move(column,row,state,-10,list,n)
   return [column,row+1]
 }
 
 function goLeft(column, row, state,list){
-  move(column,row,state,1,list)
+  const n = iterate(state)
+  move(column,row,state,1,list,n)
   return [column-1,row]
 }
 
 function goRight(column, row, state,list){
-  move(column,row,state,-1,list)
+  const n = iterate(state)
+  move(column,row,state,-1,list,n)
   return [column+1,row]
 }
 
@@ -211,10 +229,6 @@ function winningCondition(checkList){
   return true
 }
 
-function stopf(){
-  setStop(false)
-}
-
 async function startGame(){
   if(!startGameCheck()){return}
 
@@ -236,10 +250,12 @@ async function startGame(){
     surroundingCheck(orangeHead[0],orangeHead[1],orangeChecklist,notEmptySquares)
     if(winningCondition(blueChecklist)){
       console.log("orange won")
+      setGameOver(true)
       break
     }
     if(winningCondition(orangeChecklist)){
       console.log("blue won")
+      setGameOver(true)
       break
     }
     const randPlayer = Boolean(Math.round(Math.random()));
@@ -279,18 +295,18 @@ async function startGame(){
         orangeHead = goRight(orangeHead[0],orangeHead[1],2,notEmptySquares)
       }
     }
-    await new Promise(r => setTimeout(r, 50));
+    await new Promise(r => setTimeout(r, 500));
   }
   
 }
 
   return (
-    <div className='grid'>
-
-      {grid}
-
-      {chosePositionState === true ?
-
+    <div className='main'>
+      <div className='grid'>
+        {grid}
+      </div>
+        {chosePositionState === true ?
+      
       <>
 
       <p>now chosing:</p>
@@ -309,8 +325,7 @@ async function startGame(){
         :
 
         <>
-          <p>game started</p>
-          <button onClick={stopf}>stop</button>
+          <p>game started {gameOver}</p>
         </>
 
         }
