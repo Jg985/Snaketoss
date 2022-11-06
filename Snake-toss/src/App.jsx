@@ -6,12 +6,15 @@ import Pixel from './Components/Pixel'
 function App() {
   let numb = 0
   let numo = 0
+  let endloop = 0
   const [gridInfo, setGridInfo] = React.useState([])
   const [switchChoice, setSwitchChoice] = React.useState(true)
   const [headSquares, setHeadSquares] = React.useState([-1,-1,-1,-1])
   const [chosePositionState, setChosePositionState] = React.useState(true)
   const [gameOver, setGameOver] = React.useState(false)
-  const [winner, setWinner] = React.useState("")
+  const [winner, setWinner] = React.useState(0)
+  const [restart, setRestart] = React.useState(true)
+  const [loop, setLoop] = React.useState(false)
 
   function randomNumberInRange(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -31,7 +34,7 @@ React.useEffect(function(){
         }   
       }
       setGridInfo(newGridInfo)
-  }, [])
+  }, [restart])
 
 const grid = gridInfo.map(position => 
   <Pixel 
@@ -236,12 +239,24 @@ async function startGame(){
   for(let i=0; i<100; i++){
     notEmptySquares[i]=false
   }
+
+  setLoop(true)
+  endloop=1
+
   let blueHead=[headSquares[0],headSquares[1]]
   let orangeHead=[headSquares[2],headSquares[3]]
   notEmptySquares[headSquares[0]+10*headSquares[1]]=true
   notEmptySquares[headSquares[2]+10*headSquares[3]]=true
 
   while(true){
+    console.log(loop)
+    console.log(endloop)
+    // if(loop){
+    //   break
+    // }
+    if(endloop===0){
+      break
+    }
     let blueChecklist = [true,true,true,true]
     let orangeChecklist = [true,true,true,true]
     boundaryCheck(blueHead[0],blueHead[1],blueChecklist)
@@ -250,11 +265,13 @@ async function startGame(){
     surroundingCheck(orangeHead[0],orangeHead[1],orangeChecklist,notEmptySquares)
     if(winningCondition(blueChecklist)){
       console.log("orange won")
+      setWinner(4)
       setGameOver(true)
       break
     }
     if(winningCondition(orangeChecklist)){
       console.log("blue won")
+      setWinner(3)
       setGameOver(true)
       break
     }
@@ -300,6 +317,19 @@ async function startGame(){
   
 }
 
+function startOver(){
+  setRestart(prev=>!prev)
+  numb=0
+  numo=0
+  endloop=0
+  setSwitchChoice(true)
+  setHeadSquares([-1,-1,-1,-1])
+  setChosePositionState(true)
+  setGameOver(false)
+  setWinner(0)
+  setLoop(false)
+}
+
   return (
     <div className='main'>
       <div className='grid'>
@@ -308,28 +338,41 @@ async function startGame(){
         {chosePositionState === true ?
       
       <>
+      <div className='dashboard'>
+        <div className='chose'>
+          <p>Chose your starting position:</p>
 
-      <p>now chosing:</p>
+          <Pixel
+            key={"special"}
+            column={1000}
+            row={1000}
+            state={switchChoice ? 3 : 4}
+          />
+        </div>
 
-      <Pixel
-        key={"special"}
-        column={1000}
-        row={1000}
-        state={switchChoice ? 3 : 4}
-      />
+          <button className='start-button' onClick={startGame}>start</button>
 
-        <button onClick={startGame}>start</button>
-
+        </div>
       </>
-
+      
         :
 
-        <>
-          <p>game started {gameOver}</p>
-        </>
+        <div className='dashboard'>
+          <div className='dashboadr-info'>
+            <p>winner: {gameOver}</p>
+            <Pixel
+              key={"special2"}
+              column={1001}
+              row={1001}
+              state={winner}
+            />
+          </div>
+            <button className='start-button' onClick={startOver}>Reset</button>
+          
+        </div>
 
         }
-      
+    
     </div>
   )
 }
